@@ -221,3 +221,6 @@ __marimo__/
 
 # My Notebooks
 notebooks/
+
+# heavy data
+raw_data/
