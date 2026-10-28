@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# My Notebooks
+notebooks/
+
+# heavy data
+raw_data/
