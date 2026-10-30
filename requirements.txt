@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+matplotlib
+scikit-learn
+imbalanced-learn
