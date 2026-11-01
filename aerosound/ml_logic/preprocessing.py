@@ -60,3 +60,26 @@ def extract_std_features(mono_signal):
 
     extracted_features = np.array(slice_stds)
     return extracted_features
+
+def preprocess_audio(audio_path):
+    """Orchestrate the whole preprocessing steps. Load the audio file to store a
+    signal. Convert the signal into mono. Extract 100 standard-deviation features.
+
+    Parameters
+    ----------
+    audio_path : str
+        Path to the audio file to load.
+
+    Returns
+    -------
+    extracted_features : np.ndarray
+        Standard-deviation features extracted from 100 time windows, with shape (100,).
+    """
+
+    signal = load_audio(audio_path)
+
+    mono_signal = convert_to_mono(signal)
+
+    extracted_features = extract_std_features(mono_signal)
+
+    return extracted_features

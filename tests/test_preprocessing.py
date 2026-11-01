@@ -33,3 +33,16 @@ def test_extract_std_features():
 
     assert extracted_features.shape == (100,)
     assert np.allclose(extracted_features, expected_std)
+
+def test_preprocess_audio():
+    audio_path = 'raw_data/kaggle_dataset_-6_dB_fan_fan_id_00_normal_00000000.wav'
+    signal = preprocessing.load_audio(audio_path)
+    mono_signal = preprocessing.convert_to_mono(signal)
+
+    expected_features = preprocessing.extract_std_features(mono_signal)
+
+    extracted_features = preprocessing.preprocess_audio(audio_path)
+
+    assert extracted_features.shape == (100,)
+    assert isinstance(extracted_features, np.ndarray)
+    assert np.allclose(extracted_features, expected_features)
