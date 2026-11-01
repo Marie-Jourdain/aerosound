@@ -9,3 +9,17 @@ def test_load_audio():
     signal = preprocessing.load_audio(audio_path)
     assert signal.shape == (8, 160000)
     assert isinstance(signal, np.ndarray)
+
+
+def test_convert_to_mono():
+
+    signal = np.array([
+        [1, 2, 3],
+        [3, 4, 5]
+    ])
+    expected_mono_signal = np.array([2., 3., 4.])
+
+    mono_signal = preprocessing.convert_to_mono(signal)
+
+    assert np.array_equal(mono_signal, expected_mono_signal)
+    assert mono_signal.shape == (3,)
