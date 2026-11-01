@@ -23,3 +23,13 @@ def test_convert_to_mono():
 
     assert np.array_equal(mono_signal, expected_mono_signal)
     assert mono_signal.shape == (3,)
+
+def test_extract_std_features():
+
+    mono_signal = np.tile([1, 3], 100)
+    expected_std = np.ones(100)
+
+    extracted_features = preprocessing.extract_std_features(mono_signal)
+
+    assert extracted_features.shape == (100,)
+    assert np.allclose(extracted_features, expected_std)
