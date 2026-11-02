@@ -4,7 +4,7 @@ def test_build_metadata_df():
 
     audio_paths = ['kaggle_dataset_-6_dB_fan_fan_id_00_normal_00000000.wav',
                    'kaggle_dataset_0_dB_pump_pump_id_02_abnormal_00000123.wav']
-    expected_columns = ['noise', 'machine', 'id', 'label', 'file']
+    expected_columns = ['noise', 'machine', 'id', 'label', 'file', 'snr']
 
     df = data.build_metadata_df(audio_paths)
 
@@ -19,3 +19,5 @@ def test_build_metadata_df():
     assert df.loc[1, 'id'] == 'id_02'
     assert df.loc[1, 'label'] == 'abnormal'
     assert df.loc[1, 'file'] == '00000123.wav'
+    assert df.loc[0, 'snr'] == -6
+    assert df.loc[1, 'snr'] == 0

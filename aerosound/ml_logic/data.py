@@ -35,4 +35,6 @@ def build_metadata_df(audio_paths):
         columns=['noise', 'machine', 'id', 'label', 'file']
         )
 
+    df['snr'] = df['noise'].str.split('_').str[0].astype(int)
+
     return df
