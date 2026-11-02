@@ -1,4 +1,6 @@
+from aerosound.ml_logic.preprocessing import preprocess_audio
 import pandas as pd
+import numpy as np
 
 def build_metadata_df(audio_paths):
     """Remove the prefix from a list of audio paths, split the paths into metadata
@@ -38,3 +40,27 @@ def build_metadata_df(audio_paths):
     df['snr'] = df['noise'].str.split('_').str[0].astype(int)
 
     return df
+
+def build_features(audio_paths):
+    """Build 100 features by applying audio preprocessing to each audio file.
+
+    Parameters
+    ----------
+    audio_paths : list
+        List of audio paths.
+
+    Returns
+    -------
+    extracted_features : np.ndarray
+        Feature matrix containing 100 standard-deviation features per audio file,
+        with shape (n_files,100).
+    """
+    extracted_features = []
+
+    for path in audio_paths:
+        features_row = preprocess_audio(path)
+        extracted_features.append(features_row)
+
+    extracted_features = np.array(extracted_features)
+
+    return extracted_features

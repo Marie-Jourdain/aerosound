@@ -1,4 +1,5 @@
 from aerosound.ml_logic import data
+import numpy as np
 
 def test_build_metadata_df():
 
@@ -21,3 +22,13 @@ def test_build_metadata_df():
     assert df.loc[1, 'file'] == '00000123.wav'
     assert df.loc[0, 'snr'] == -6
     assert df.loc[1, 'snr'] == 0
+
+def test_build_features():
+    audio_path = 'raw_data/kaggle_dataset_-6_dB_fan_fan_id_00_normal_00000000.wav'
+    audio_paths = [audio_path, audio_path]
+
+    extracted_features = data.build_features(audio_paths)
+
+    assert isinstance(extracted_features, np.ndarray)
+    assert extracted_features.shape == (2,100)
+    assert np.allclose(extracted_features[0], extracted_features[1])
