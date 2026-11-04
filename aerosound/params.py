@@ -20,7 +20,7 @@ MLFLOW_TRACKING_URI=os.environ.get("MLFLOW_TRACKING_URI")
 MLFLOW_EXPERIMENT=os.environ.get("MLFLOW_EXPERIMENT")
 MLFLOW_MODEL_NAME=os.environ.get("MLFLOW_MODEL_NAME")
 
-LOCAL_REGISTRY_PATH = '/home/jana/code/Marie-Jourdain/aerosound/models'
-#LOCAL_REGISTRY_PATH = os.environ.get('LOCAL_REGISTRY_PATH')
+#LOCAL_REGISTRY_PATH = '/home/jana/code/Marie-Jourdain/aerosound/models'
+ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 
 #===============CONSTANTS====================
