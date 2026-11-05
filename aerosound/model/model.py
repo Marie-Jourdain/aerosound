@@ -5,11 +5,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
-from sklearn.model_selection import GridSearchCV
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import Normalizer
+from sklearn.model_selection import GridSearchCV, StratifiedKFold
 import pandas as pd
 
 
@@ -78,6 +78,47 @@ def best_knn_model(X_train, y_train, score):
         pipeline,
         param_grid,
         cv=5,
+        scoring=score,
+        n_jobs=-1
+    )
+
+    # Step 4: Fit original training data
+    grid.fit(X_train, y_train)
+
+    # Step 5: Results
+    print("Best parameters:", grid.best_params_)
+    print("Best CV score:", grid.best_score_)
+    return grid.best_estimator_
+
+def best_knn_model_skf(X_train, y_train, score):
+# automaticly find the model with the best set of hyperparameters
+    # Step 1: Create pipeline
+    pipeline = Pipeline([
+        ('oversampler', RandomOverSampler(
+            sampling_strategy=1.0,
+            random_state=42
+        )),
+        ('knn', KNeighborsClassifier())
+    ])
+
+    # Step 2: Define hyperparameters
+    param_grid = {
+        'knn__n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+        'knn__weights': ['uniform', 'distance'],
+        'knn__p': [1, 2]
+    }
+
+    skf = StratifiedKFold(
+    n_splits=5,
+    shuffle=True,
+    random_state=42
+)
+
+    # Step 3: GridSearchCV
+    grid = GridSearchCV(
+        pipeline,
+        param_grid,
+        cv=skf,
         scoring=score,
         n_jobs=-1
     )
@@ -214,5 +255,5 @@ if __name__ == "__main__":
     machine_dfs = data_obtain('../../features_0dB.csv')
     data_ori = machine_dfs['fan']
     X_train, X_test, y_train, y_test = prep_data(data_ori)
-    knn_model = best_knn_model(X_train, y_train, 'f1')
+    knn_model = best_knn_model_skf(X_train, y_train, 'f1')
     show_result(knn_model, X_test, y_test)
