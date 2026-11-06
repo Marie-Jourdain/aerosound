@@ -1,5 +1,12 @@
 fastapi
 uvicorn
+
 matplotlib
 scikit-learn
 imbalanced-learn
+
+librosa
+numpy
+pandas
+
+python-multipart==0.0.32

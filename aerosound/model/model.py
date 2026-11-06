@@ -5,12 +5,14 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.metrics import classification_report
+
 from imblearn.over_sampling import RandomOverSampler
 from imblearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import Normalizer
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 import pandas as pd
+from aerosound.params import *
 
 
 def data_obtain(path):
@@ -69,6 +71,7 @@ def best_knn_model(X_train, y_train, score):
     # Step 2: Define hyperparameters
     param_grid = {
         'knn__n_neighbors': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
+
         'knn__weights': ['uniform', 'distance'],
         'knn__p': [1, 2]
     }
@@ -89,6 +92,7 @@ def best_knn_model(X_train, y_train, score):
     print("Best parameters:", grid.best_params_)
     print("Best CV score:", grid.best_score_)
     return grid.best_estimator_
+
 
 def best_knn_model_skf(X_train, y_train, score):
 # automaticly find the model with the best set of hyperparameters
@@ -250,10 +254,12 @@ def show_result_scaled_method2(model, X_test, y_test):
 
 
 
+
 # test functions above
 if __name__ == "__main__":
     machine_dfs = data_obtain('../../features_0dB.csv')
     data_ori = machine_dfs['fan']
     X_train, X_test, y_train, y_test = prep_data(data_ori)
-    knn_model = best_knn_model_skf(X_train, y_train, 'f1')
+    knn_model = best_knn_model(X_train, y_train, 'recall')
+
     show_result(knn_model, X_test, y_test)
