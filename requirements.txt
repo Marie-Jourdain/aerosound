@@ -5,6 +5,8 @@ matplotlib
 scikit-learn
 imbalanced-learn
 
+tensorflow
+
 librosa
 numpy
 pandas
