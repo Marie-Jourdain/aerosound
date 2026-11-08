@@ -17,6 +17,7 @@ import numpy as np
 from keras import Sequential, layers
 from keras.metrics import Recall
 from keras.callbacks import EarlyStopping
+from keras.optimizers import Adam
 
 def data_obtain_rnn(path):
 # obtain data from the path and saperated the data by machine type and save the dataframes into a dictionary and return to this dictionary
@@ -54,6 +55,8 @@ def prep_data_rnn(data_ori):
         X_train.shape[1],
         1
     )
+
+    #try: valuable!!!
     X_train_rnn = X_train_rnn * 100
 
     # X_test_rnn = X_test.to_numpy().reshape(
@@ -77,7 +80,7 @@ def rnn_LSTM(X_train_rnn, y_train):
 
     #compile the model
     model.compile(
-        optimizer = 'adam',
+        optimizer = Adam(learning_rate=0.00005),
         loss = 'binary_crossentropy',
         metrics=[
             Recall(name='recall'),
@@ -89,7 +92,7 @@ def rnn_LSTM(X_train_rnn, y_train):
     #define early stop
     early_stop = EarlyStopping(
         monitor='val_loss',
-        patience=5,
+        patience=12,
         restore_best_weights=True
     )
 
@@ -106,7 +109,7 @@ def rnn_LSTM(X_train_rnn, y_train):
     history = model.fit(
         X_train_rnn,
         y_train,
-        epochs=50,
+        epochs=500,
         batch_size=32,
         validation_split=0.2,
         callbacks=[early_stop],
@@ -121,8 +124,10 @@ def predict_sound(model, X_pred):
         X_pred.shape[1],
         1
     )
+    X_pred_rnn = X_pred_rnn * 100
     y = model.predict(X_pred_rnn)
-    return (y >= 0.5).astype(int)
+    return (y >= 0.35).astype(int)
+
 
 def model_evaluate(model, X_test, y_test):
     ''' show the performance of the model '''
@@ -136,6 +141,7 @@ def model_evaluate(model, X_test, y_test):
 
     plt.title("Confusion Matrix")
     plt.show()
+
 
 
 # test functions above
