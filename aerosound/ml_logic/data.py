@@ -144,7 +144,7 @@ def build_dataset(audio_paths):
 
     features = build_features(audio_paths)
 
-    feature_cols = [f"f_{i:03d}" for i in range(400)]
+    feature_cols = [f"f_{i:03d}" for i in range(100)]
 
     features_df = pd.DataFrame(features, columns=feature_cols)
 
