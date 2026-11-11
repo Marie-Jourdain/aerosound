@@ -37,7 +37,7 @@ def convert_to_mono(signal):
 
     return mono_signal
 
-def extract_std_features(mono_signal):
+def extract_type_features(mono_signal):
     """Split a mono audio time series into 100 time windows and convert them to features
     representing the standard deviation of the audio amplitude within each time window.
 
@@ -56,9 +56,9 @@ def extract_std_features(mono_signal):
 
     split_means = np.array_split(mono_signal, 100)
 
-    slice_stds = [s.std() for s in split_means]
+    slice_types = [s.std() for s in split_means]
 
-    extracted_features = np.array(slice_stds)
+    extracted_features = np.array(slice_types)
     return extracted_features
 
 def preprocess_audio(audio_path):
@@ -80,6 +80,6 @@ def preprocess_audio(audio_path):
 
     mono_signal = convert_to_mono(signal)
 
-    extracted_features = extract_std_features(mono_signal)
+    extracted_features = extract_type_features(mono_signal)
 
     return extracted_features
