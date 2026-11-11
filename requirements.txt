@@ -11,4 +11,11 @@ librosa
 numpy
 pandas
 
+matplotlib
+scikit-learn
+imbalanced-learn
+
 python-multipart==0.0.32
+
+colorama
+google-cloud-storage

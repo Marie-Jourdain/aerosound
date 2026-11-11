@@ -3,10 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 import io
 import pickle # skipped later
 
-from aerosound.params import * # can be skipped later
+from aerosound.params import *
 from aerosound.ml_logic.preprocessing import preprocess_audio
-from aerosound.model.model import data_obtain, prep_data
+#from aerosound.model.model import data_obtain, prep_data
 
+'''
+API that takes a WAV-file as upload, converts it and makes a prediction.
+'''
 
 app = FastAPI()
 
@@ -25,11 +28,8 @@ def root():
         'vital sign': "I'm alive!"
     }
 
-@app.post("/file")
-def process_audio(file: UploadFile):
-
-    # conversion of the wav file
-    # directly: signal, _ = librosa.load(file.file)
+@app.post("/predict")
+def predict_audio(file: UploadFile):
 
     # TODO: wrap up in a process_function in interface/main.py ?
     features = preprocess_audio(file.file) # features are a np-array
@@ -39,8 +39,10 @@ def process_audio(file: UploadFile):
     #data = data_obtain(features)
     print("Features extracted")
 
-    model_path = os.path.join(LOCAL_REGISTRY_PATH, "best_knn_fan.pkl")
+    model_path = os.path.join(ROOT_PATH, 'models', 'best_knn_fan.pkl')
+    print(model_path)
     if MODEL_TARGET == 'local':
+        print(model_path)
         with open(model_path, "rb") as file1:
             my_model = pickle.load(file1)
 
@@ -52,11 +54,8 @@ def process_audio(file: UploadFile):
 
     return {"class": int(prediction[0])}
 
-    #return {"status": "success", "samples": len(signal)}
-
-@app.get("/predict")
-def predict(wav_name: str): # filepath to the wav
-
+@app.get("/predict_text")
+def predict_text(wav_name: str): # filepath to the wav
 
     # "/kaggle/input/datasets/bisheshgiri/mimii-dataset/-6_dB_fan/fan/id_00/abnormal/00000000.wav"
     short = wav_name.replace("/kaggle/input/datasets/bisheshgiri/mimii-dataset/",'')
