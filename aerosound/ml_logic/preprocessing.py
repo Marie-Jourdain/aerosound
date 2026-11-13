@@ -56,9 +56,11 @@ def extract_type_features(mono_signal):
 
     split_means = np.array_split(mono_signal, 100)
 
-    slice_types = [s.std() for s in split_means]
+    slice_type_1 = np.array([np.std(s) for s in split_means])
 
-    extracted_features = np.array(slice_types)
+    slice_type_2 = np.array([np.mean(np.diff(np.signbit(s)) != 0) for s in split_means])
+
+    extracted_features = np.column_stack((slice_type_1, slice_type_2))
     return extracted_features
 
 def preprocess_audio(audio_path):
