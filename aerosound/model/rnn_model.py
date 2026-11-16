@@ -143,7 +143,6 @@ def model_evaluate(model, X_test, y_test):
     plt.show()
 
 
-
 # test functions above
 if __name__ == "__main__":
     machine_dfs = data_obtain_rnn('../../features_0dB.csv')
