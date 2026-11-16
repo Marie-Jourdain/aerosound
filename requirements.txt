@@ -5,7 +5,8 @@ matplotlib
 scikit-learn
 imbalanced-learn
 
-tensorflow
+# tensorflow that would not look for a GPU and is a bit lighter
+tensorflow-cpu==2.21.0
 
 librosa
 numpy

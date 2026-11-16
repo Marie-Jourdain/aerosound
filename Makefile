@@ -12,3 +12,9 @@ deploy_to_cloud_run:
 		--image ${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT}/${ARTIFACTSREPO}/${IMAGE}:prod \
 		--memory ${MEMORY} \
 		--region ${GCP_REGION}
+
+run_train:
+	python -c 'from aerosound.interface.main import train; train()'
+
+run_evaluate:
+	python -c 'from aerosound.interface.main import evaluate; evaluate()'

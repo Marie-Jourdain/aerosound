@@ -1,5 +1,9 @@
 import librosa
 import numpy as np
+import os
+import tensorflow as tf
+from aerosound.params import *
+
 
 def load_audio(audio_path):
     """Load a multichannel audio file without resampling or converting it to mono.
@@ -83,3 +87,23 @@ def preprocess_audio(audio_path):
     extracted_features = extract_type_features(mono_signal)
 
     return extracted_features
+
+
+#---------------------------------------
+# functions for the yamnet model
+#---------------------------------------
+
+def wav_to_embeddings(path, model_yam):
+    y, sr = librosa.load(path, sr=16000, mono=True)   # 8 channels -> mean
+    # y = librosa.util.normalize(y)                      # [-1, 1]
+    _, emb, _ = model_yam(y.astype(np.float32))
+
+    return np.mean(emb, axis=0)
+
+def preprocess_yamnet(path):    # path to the .wav-file or the file itsself
+    yamnet_path = os.path.join(ROOT_PATH, 'models', 'yamnet-emb')
+    model_yam = tf.saved_model.load(yamnet_path)
+
+    embedding = wav_to_embeddings(path, model_yam)
+
+    return embedding
