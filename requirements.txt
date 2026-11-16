@@ -6,6 +6,7 @@ scikit-learn
 imbalanced-learn
 
 tensorflow
+joblib
 
 librosa
 numpy

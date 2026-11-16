@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import joblib
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import ConfusionMatrixDisplay, roc_auc_score, recall_score
@@ -131,9 +132,25 @@ def rnn_LSTM(X_train_rnn, X_val, y_train, y_val):
     )
     return model, history
 
-def predict_API(model, path_wav):
-    ''' via API input wav file and output predict normal/abnormal '''
+def make_scaler(data_train):
     scaler = StandardScaler()
+    data = data_train.copy()
+    data = data.drop_duplicates()
+    data['label'] = data['label'].map({
+        'normal': 0,
+        'abnormal': 1
+    })
+    data = data.drop(columns=['noise','machine','id','file','snr'])
+    data = data.rename(columns={'label':'target'})
+    X = data.drop(columns = 'target')
+    y = data['target']
+
+    scaler.fit(X.to_numpy().reshape(-1, 2))
+
+    return scaler
+
+def predict_API(model, path_wav, scaler):
+    ''' via API input wav file and output predict normal/abnormal '''
     # Extract features from WAV
     X = preprocess_audio(path_wav)
 
@@ -141,7 +158,7 @@ def predict_API(model, path_wav):
     X = X.reshape(1, X.shape[0], X.shape[1])
 
     # Apply the training scaler
-    X_scaled = scaler.fit_transform(
+    X_scaled = scaler.transform(
         X.reshape(-1, 2)
     ).reshape(X.shape)
 
@@ -151,12 +168,8 @@ def predict_API(model, path_wav):
 
 def predict_sound(model, X_pred):
     ''' when test the model with X_test and y_test, run this predict '''
-    X_pred_rnn = X_pred
+    X_pred_rnn = X_pred.reshape(X_pred.shape[0], X_pred.shape[1], X_pred.shape[2])
     #X_pred_rnn = X_pred_rnn * 100
-    scaler = StandardScaler()
-    X_pred_rnn = scaler.fit_transform(
-        X_pred_rnn.reshape(-1, 2)
-    ).reshape(X_pred.shape[0], X_pred.shape[1], X_pred.shape[2])
 
     y = model.predict(X_pred_rnn)
     return (y >= 0.4).astype(int), y
