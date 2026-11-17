@@ -124,30 +124,56 @@ def build_features(audio_paths):
 
     return extracted_features
 
+# def build_dataset(audio_paths):
+#     """Build a dataset by combining audio metadata and extracted features into
+#     a single DataFrame.
+
+#     Parameters
+#     ----------
+#     audio_paths : list
+#         List of audio paths.
+
+#     Returns
+#     --------
+#     metadata_features_df : pd.DataFrame
+#         DataFrame containing six metadata columns and 100 standard-deviation
+#         feature columns, with shape (n_files, 106).
+#     """
+
+#     metadata_df = build_metadata_df(audio_paths)
+
+#     features = build_features(audio_paths)
+
+#     feature_cols = [f"f_{i:03d}" for i in range(len(features))]
+
+#     features_df = pd.DataFrame(features, columns=feature_cols)
+
+#     metadata_features_df = pd.concat([metadata_df, features_df], axis=1)
+
+#     return metadata_features_df
+
 def build_dataset(audio_paths):
-    """Build a dataset by combining audio metadata and extracted features into
-    a single DataFrame.
-
-    Parameters
-    ----------
-    audio_paths : list
-        List of audio paths.
-
-    Returns
-    --------
-    metadata_features_df : pd.DataFrame
-        DataFrame containing six metadata columns and 100 standard-deviation
-        feature columns, with shape (n_files, 106).
-    """
 
     metadata_df = build_metadata_df(audio_paths)
 
     features = build_features(audio_paths)
 
-    feature_cols = [f"f_{i:03d}" for i in range(100)]
+    # (5550, 100, 2) -> (5550, 200)
+    features = features.reshape(features.shape[0], -1)
 
-    features_df = pd.DataFrame(features, columns=feature_cols)
+    # Generate 200 column names
+    feature_cols = [
+        f"f_{i:03d}" for i in range(features.shape[1])
+    ]
 
-    metadata_features_df = pd.concat([metadata_df, features_df], axis=1)
+    features_df = pd.DataFrame(
+        features,
+        columns=feature_cols
+    )
+
+    metadata_features_df = pd.concat(
+        [metadata_df, features_df],
+        axis=1
+    )
 
     return metadata_features_df
