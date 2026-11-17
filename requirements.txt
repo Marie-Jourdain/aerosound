@@ -5,7 +5,7 @@ matplotlib
 scikit-learn
 imbalanced-learn
 
-# tensorflow that would not look for a GPU and is a bit lighter
+# lighter version to have a smaller docker image
 tensorflow-cpu==2.21.0
 
 librosa
@@ -15,8 +15,6 @@ pandas
 matplotlib
 scikit-learn
 imbalanced-learn
-
-python-multipart==0.0.32
 
 colorama
 google-cloud-storage
