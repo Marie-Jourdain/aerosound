@@ -1,18 +1,38 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+import os
 import io
 import pickle # skipped later
 
 from aerosound.params import *
 from aerosound.ml_logic.preprocessing import preprocess_audio, preprocess_yamnet
 from aerosound.ml_logic.registry import load_model
+from aerosound.params import ROOT_PATH
 #from aerosound.model.model import data_obtain, prep_data
 
 '''
 API that takes a WAV-file as upload, converts it and makes a prediction.
 '''
+# warmup of the API (including loading a model)
 
-app = FastAPI()
+def run_prediction(raw_input):
+    x = preprocess(raw_input)
+    emb = models["cnn"].predict(x)
+    return models["dense"].predict(emb)
+
+d_path = os.path.join(ROOT_PATH, 'models/dummy/dummy.wav')
+
+@asynccontextmanager
+async def lifespan(app):
+    d_features = preprocess_yamnet(d_path) # features are a np-array
+    d_features = d_features.reshape(1,1024)
+    dummy_model = load_model('y_model_fan_2d_k12.keras'))
+    dummy_model.predict(d_features)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 # Allowing all middleware is optional, but good practice for dev purposes
 app.add_middleware(
@@ -29,10 +49,10 @@ def root():
         'vital sign': "I'm alive!"
     }
 
+import time, logging
 @app.post("/predict")
-def predict_audio(file: UploadFile):
+def predict_rnn(file: UploadFile):
 
-    #TODO: check if the file is wav, if it is 10 sec long
     features = preprocess_audio(file.file) # features are a np-array
 
     features = features.reshape(1,100)
@@ -54,8 +74,8 @@ def predict_audio(file: UploadFile):
 
 @app.post("/predict_yam")
 def predict_yam(file: UploadFile):
+    t0=time.perf_counter()
 
-    #TODO: check if the file is wav, if it is 10 sec long
     features = preprocess_yamnet(file.file) # features are a np-array
 
     features = features.reshape(1,1024)
@@ -71,7 +91,7 @@ def predict_yam(file: UploadFile):
     probab = (1-float(prediction[0][0])) if prediction[0][0]<0.5 else float(prediction[0][0])
 
     print(f'Made the following prediction: {pred_class}, with {float(probab)*100:.2f}% probability!')
-
+    logging.warning(f"predict took {time.perf_counter() - t0:.2f}s")
     return {"class": pred_class, "probability": probab}
 
 @app.get("/predict_text")
