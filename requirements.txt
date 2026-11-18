@@ -11,6 +11,7 @@ joblib
 tensorflow-cpu==2.21.0
 
 librosa
+python-multipart
 numpy
 pandas
 

@@ -94,7 +94,7 @@ def predict_text(wav_name: str): # filepath to the wav
 
     # "/kaggle/input/datasets/bisheshgiri/mimii-dataset/-6_dB_fan/fan/id_00/abnormal/00000000.wav"
     short = wav_name.replace("/kaggle/input/datasets/bisheshgiri/mimii-dataset/",'')
-    parts=wav_name.split(sep='/')
+    parts=wav_name.split(sep='_')
     classification = parts[-2]
 
     return {
