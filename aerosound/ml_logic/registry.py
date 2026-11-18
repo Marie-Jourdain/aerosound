@@ -11,7 +11,6 @@ from google.cloud import storage
 #import mlflow
 #from mlflow.tracking import MlflowClient
 
-#TODO: if we will have different models, code could be inserted to choose model-type when loading and saving
 
 def save_model(model: keras.Model = None) -> None:
     '''
@@ -43,6 +42,16 @@ def save_model(model: keras.Model = None) -> None:
         pass
         #TODO: if needed
 
+_cnn_model = None
+
+def get_cnn(path):
+    # once it is loaded, the model will be reused in this module, each time a model will be needed
+    global _cnn_model
+
+    if _cnn_model is None:
+        _cnn_model = keras.models.load_model(path)
+    return _cnn_model
+
 
 def load_model(name=None) -> keras.Model:
     """
@@ -56,7 +65,6 @@ def load_model(name=None) -> keras.Model:
     Return None (but do not Raise) if no model is found
 
     """
-
     if MODEL_TARGET == "local":
 
         if name:
@@ -80,7 +88,10 @@ def load_model(name=None) -> keras.Model:
 
         #---------------
 
-        latest_model = keras.models.load_model(most_recent_model_path_on_disk)
+        latest_model = get_cnn(most_recent_model_path_on_disk) # loads the model and saves it as a
+                                                                # global variable, to be reused every
+                                                                # time the module is called again
+                                                                # (and that means: in different endpoints of the API)
 
         print("✅ Model loaded from local disk")
 

@@ -164,6 +164,7 @@ def predict_API(model, path_wav, scaler):
 
     # Predict
     y = model.predict(X_scaled)
+    print(y)
     return (y >= 0.4).astype(int).item()
 
 def predict_sound(model, X_pred):

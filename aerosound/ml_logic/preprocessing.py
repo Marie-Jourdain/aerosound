@@ -96,16 +96,25 @@ def preprocess_audio(audio_path):
 #---------------------------------------
 
 def wav_to_embeddings(path, model_yam):
-    y, sr = librosa.load(path, sr=16000, mono=True)   # 8 channels -> mean
-    # y = librosa.util.normalize(y)                      # [-1, 1]
+
+    y, _ = librosa.load(path, sr=16000, mono=True)   # 8 channels -> mean
     _, emb, _ = model_yam(y.astype(np.float32))
 
     return np.mean(emb, axis=0)
 
-def preprocess_yamnet(path):    # path to the .wav-file or the file itsself
-    yamnet_path = os.path.join(ROOT_PATH, 'models', 'yamnet-emb')
-    model_yam = tf.saved_model.load(yamnet_path)
+_model_yam = None
 
+def get_yamnet():
+    # once it is loaded, the model will be reused in this module, each time a model will be needed
+    global _model_yam
+    if _model_yam is None:
+        yamnet_path = os.path.join(ROOT_PATH, 'models', 'yamnet-emb')
+        _model_yam = tf.saved_model.load(yamnet_path)
+    return _model_yam
+
+def preprocess_yamnet(path):    # path to the .wav-file or the file itsself
+
+    model_yam = get_yamnet()
     embedding = wav_to_embeddings(path, model_yam)
 
     return embedding

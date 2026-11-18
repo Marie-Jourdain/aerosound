@@ -1,40 +1,42 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-import os
 import io
-import pickle # skipped later
+import os
+import joblib
+
+from tensorflow import keras
 
 from aerosound.params import *
-from aerosound.ml_logic.preprocessing import preprocess_audio, preprocess_yamnet
+from aerosound.ml_logic.preprocessing import preprocess_yamnet
 from aerosound.ml_logic.registry import load_model
 from aerosound.params import ROOT_PATH
-#from aerosound.model.model import data_obtain, prep_data
+from aerosound.model.rnn_model import predict_API
 
 '''
 API that takes a WAV-file as upload, converts it and makes a prediction.
 '''
+
 # warmup of the API (including loading a model)
-
-def run_prediction(raw_input):
-    x = preprocess(raw_input)
-    emb = models["cnn"].predict(x)
-    return models["dense"].predict(emb)
-
-d_path = os.path.join(ROOT_PATH, 'models/dummy/dummy.wav')
+#-----------------------------------------------
+# preload the models and make a first (dummy)-prediction to have everything set
+# before the first real prediction
+d_path = os.path.join(ROOT_PATH, 'models/dummy/dummy.wav') # dummy sound file
 
 @asynccontextmanager
 async def lifespan(app):
-    d_features = preprocess_yamnet(d_path) # features are a np-array
-    d_features = d_features.reshape(1,1024)
-    dummy_model = load_model('y_model_fan_2d_k12.keras'))
+    # preprocess a dummy-file. the models will be loaded globally, so that it can
+    # be reused for the prediction
+    d_features = preprocess_yamnet(d_path).reshape(1,1024)
+
+    dummy_model = load_model('y_model_fan_2d_k12.keras')
     dummy_model.predict(d_features)
     yield
 
 
 app = FastAPI(lifespan=lifespan)
 
-# Allowing all middleware is optional, but good practice for dev purposes
+# Allowing all middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Allows all origins
@@ -49,49 +51,42 @@ def root():
         'vital sign': "I'm alive!"
     }
 
-import time, logging
-@app.post("/predict")
+
+@app.post("/predict_rnn")
 def predict_rnn(file: UploadFile):
 
-    features = preprocess_audio(file.file) # features are a np-array
-
-    features = features.reshape(1,100)
-
-    #data = data_obtain(features)
-    print("Features extracted")
-
-    #model_path = os.path.join(ROOT_PATH, 'models', 'best_knn_fan.pkl') #TODO: delete if really not needed
-
-    my_model=load_model('20261111-172416.keras')
-
+    rnn_path = os.path.join(ROOT_PATH, 'models', 'lstm_stdzcr_allnoise_100_0.85_0.64.keras')
+    rnn_model=keras.models.load_model(rnn_path) # load model directly, the
+                                                # registry.load_model-function would reuse
+                                                # the preloaded global model which is a cnn-model.
     print("model loaded")
 
-    prediction = my_model.predict(features)
+    # get the scaler
+    sc_path = os.path.join(ROOT_PATH, 'aerosound', 'model', 'standard_scaler.pkl')
+    with open(sc_path, "rb") as s_file:
+        scaler = joblib.load(s_file)
 
-    print(f'Made the following prediction: {prediction[0]}!')
+    prediction = predict_API(rnn_model, file.file, scaler)
+    print(f'Made the following prediction: {prediction}')
 
-    return {"class": int(prediction[0])}
+    return {"class": prediction}
+
 
 @app.post("/predict_yam")
 def predict_yam(file: UploadFile):
-    t0=time.perf_counter()
 
-    features = preprocess_yamnet(file.file) # features are a np-array
-
-    features = features.reshape(1,1024)
-
+    features = preprocess_yamnet(file.file).reshape(1,1024) # features are a np-array
     print("Features extracted")
 
-    my_model = load_model('y_model_fan_2d_k12.keras')
-
+    cnn_model = load_model('y_model_fan_2d_k12.keras')
     print("model loaded")
 
-    prediction = my_model.predict(features)
+    prediction = cnn_model.predict(features)
     pred_class = 0 if prediction[0][0]<0.5 else 1
     probab = (1-float(prediction[0][0])) if prediction[0][0]<0.5 else float(prediction[0][0])
 
     print(f'Made the following prediction: {pred_class}, with {float(probab)*100:.2f}% probability!')
-    logging.warning(f"predict took {time.perf_counter() - t0:.2f}s")
+
     return {"class": pred_class, "probability": probab}
 
 @app.get("/predict_text")
